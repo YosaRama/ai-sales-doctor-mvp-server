@@ -1,0 +1,20 @@
+[project]
+name = "ai-sales-doctor-mvp-server"
+version = "1.0.0"
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "sqlalchemy",
+  "psycopg2",
+  "alembic",
+  "pydantic",
+  "pydantic-settings",
+  "python-dotenv",
+]
+
+[project.scripts]
+app = "app:app"
+
+[tool.vercel.scripts]
+build = "python build.py"
