@@ -1,0 +1,52 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# =========================
+# Virtual environments
+# =========================
+venv/
+.env
+.env.*
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# =========================
+# Alembic
+# =========================
+alembic/versions/__pycache__/
+alembic/versions/*.pyc
+
+# (Optional) if you NEVER want to commit generated migrations
+# ⚠️ Usually you DO want to commit migrations
+# alembic/versions/*.py
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Testing / Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Build / Dist
+# =========================
+build/
+dist/
+*.egg-info/
