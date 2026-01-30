@@ -8,10 +8,9 @@ from app.core.middleware import register_middleware
 
 load_dotenv()
 
-
 def create_app() -> FastAPI:
     setup_logging()
-    
+
     app = FastAPI(title="AI Sales Doctor MVP")
 
     register_middleware(app)

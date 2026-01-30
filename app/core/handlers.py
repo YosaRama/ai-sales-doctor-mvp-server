@@ -30,6 +30,9 @@ def register_exception_handlers(app):
 
     @app.exception_handler(DBAPIError)
     async def db_exception_handler(request: Request, exc: DBAPIError):
+        logger.error("DBAPIError caught")
+        logger.error("Path: %s %s", request.method, request.url.path)
+        logger.error("Exception: %s", exc)
         logger.exception(
             "Database error",
             extra={
