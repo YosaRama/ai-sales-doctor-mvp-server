@@ -16,11 +16,13 @@ class IndustryService:
         return industry
 
     def create_industry(self, data: IndustryCreate):
-        return self.repo.CREATE(data)
+        industry_data = data.model_dump()
+        return self.repo.CREATE(industry_data)
 
     def update_industry(self, industry_id: int, data: IndustryUpdate):
         industry = self.get_industry(industry_id)
-        return self.repo.UPDATE(industry, data)
+        industry_data = data.model_dump()
+        return self.repo.UPDATE(industry, industry_data)
 
     def delete_industry(self, industry_id: int):
         industry = self.get_industry(industry_id)

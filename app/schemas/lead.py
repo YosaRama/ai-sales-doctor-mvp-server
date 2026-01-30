@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 class LeadBase(BaseModel):
@@ -8,8 +9,6 @@ class LeadBase(BaseModel):
     email: EmailStr
     headcount: int
     industry_id: int
-    created_at: str
-    updated_at: str
 
 class LeadCreate(LeadBase):
     pass
@@ -19,6 +18,8 @@ class LeadUpdate(LeadBase):
 
 class LeadResponse(LeadBase):
     id: int
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

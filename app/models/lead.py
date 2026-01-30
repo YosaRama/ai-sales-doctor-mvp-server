@@ -1,5 +1,6 @@
 from sqlalchemy import String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql.expression import text
 from app.core.database import Base
 
 class Lead(Base):
@@ -13,8 +14,8 @@ class Lead(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     headcount: Mapped[int] = mapped_column(Integer)
     industry_id: Mapped[int] = mapped_column(Integer, ForeignKey("industries.id"))
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default="NOW()")
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default="NOW()", onupdate="NOW()")
+    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=text("NOW()"))
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=text("NOW()"), onupdate=text("NOW()"))
 
-    industry = relationship("industry", back_populates="leads")
+    industry = relationship("Industry", back_populates="leads")
     

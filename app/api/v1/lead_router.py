@@ -1,20 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.dependencies.db import get_db
 from app.schemas.lead import LeadCreate, LeadUpdate, LeadResponse
+from app.schemas.base import PaginatedResponse
 from app.services.lead_services import LeadService
 
 router = APIRouter(prefix="/api/v1/leads", tags=["Leads"])
 
-@router.get("/", response_model=list[LeadResponse])
+@router.get("/", response_model=PaginatedResponse[LeadResponse])
 def get_leads(
     db: Session = Depends(get_db),
-    filter: str = None,
+    logic: str = Query("AND", regex="^(AND|OR)$"),
     page: int = 1,
     page_size: int = 10,
+    name: str | None = None,
+    headcount: str | None = None,
+    industry_ids: str | None = None
 ):
-    return LeadService(db).list_leads(filter=filter, page=page, page_size=page_size)
+    return LeadService(db).list_leads(
+        logic=logic, 
+        page=page, 
+        page_size=page_size,
+        name=name,
+        headcount=headcount,
+        industry_ids=industry_ids
+    )
 
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db)):

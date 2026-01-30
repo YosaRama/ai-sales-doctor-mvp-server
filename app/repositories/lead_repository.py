@@ -1,49 +1,59 @@
 from sqlalchemy.orm import Session
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadUpdate
+from sqlalchemy import or_, and_
+
 
 class LeadRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def GET_ALL(self, page: int = 1, page_size: int = 10, filter: str = None):
+    def GET_ALL(
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        name: str | None = None,
+        headcount: str | None = None,
+        industry_ids: list[int] | None = None,
+        logic: str = "AND",
+    ):
         offset = (page - 1) * page_size
         query = self.db.query(Lead)
+
+        conditions = []
+
+        if name:
+            conditions.append(Lead.name.ilike(f"%{name}%"))
+
+        if headcount:
+            if "-" in headcount:
+                min_val, max_val = map(int, headcount.split("-"))
+                conditions.append(Lead.headcount.between(min_val, max_val))
+            else:
+                conditions.append(Lead.headcount == int(headcount))
+
+        if industry_ids:
+            conditions.append(Lead.industry_id.in_(industry_ids))
+
+        if conditions:
+            query = query.filter(
+                or_(*conditions) if logic == "OR" else and_(*conditions)
+            )
+
         total = query.count()
 
-        # filter by name, industries, headcount by range
-        if filter:
-            filter_parts = filter.split(" ")
-            for part in filter_parts:
-                if ":" in part:
-                    key, value = part.split(":")
-                    if key == "name":
-                        query = query.filter(Lead.name.contains(value))
-                    elif key == "industry":
-                        query = query.filter(Lead.industry.contains(value))
-                    elif key == "headcount":
-                        headcount_range = value.split("-")
-                        if len(headcount_range) == 2:
-                            headcount_min, headcount_max = headcount_range
-                            query = query.filter(Lead.headcount.between(headcount_min, headcount_max))
-                        elif len(headcount_range) == 1:
-                            headcount_min = headcount_range[0]
-                            query = query.filter(Lead.headcount >= headcount_min)
-        
         items = (
-            query
+            query.order_by(Lead.created_at.desc())
             .offset(offset)
             .limit(page_size)
-            .order_by(Lead.created_at.desc())
             .all()
         )
 
         return {
             "result": items,
             "total": total,
-            "page": page,
-            "page_size": page_size,
         }
+
 
     def GET_BY_ID(self, lead_id: int):
         return self.db.query(Lead).filter(Lead.id == lead_id).first()
@@ -51,7 +61,6 @@ class LeadRepository:
     def CREATE(self, data: LeadCreate):
         lead = Lead(**data.model_dump())
 
-        # add validation checking existing leads
         existing_lead = self.db.query(Lead).filter(Lead.email == data.email).first()
         if existing_lead:
             raise ValueError("Lead with email already exists")
