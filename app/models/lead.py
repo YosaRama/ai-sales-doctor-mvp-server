@@ -1,5 +1,5 @@
 from sqlalchemy import String, Integer, ForeignKey, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 class Lead(Base):
@@ -15,4 +15,6 @@ class Lead(Base):
     industry_id: Mapped[int] = mapped_column(Integer, ForeignKey("industries.id"))
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default="NOW()")
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default="NOW()", onupdate="NOW()")
+
+    industry = relationship("industry", back_populates="leads")
     
