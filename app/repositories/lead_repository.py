@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from app.core.exception import AppException
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadUpdate
 from sqlalchemy import or_, and_
@@ -59,16 +60,25 @@ class LeadRepository:
         return self.db.query(Lead).filter(Lead.id == lead_id).first()
 
     def CREATE(self, data: LeadCreate):
-        lead = Lead(**data.model_dump())
+        try:
+            lead = Lead(**data.model_dump())
 
-        existing_lead = self.db.query(Lead).filter(Lead.email == data.email).first()
-        if existing_lead:
-            raise ValueError("Lead with email already exists")
-        
-        self.db.add(lead)
-        self.db.commit()
-        self.db.refresh(lead)
-        return lead
+            existing_lead = self.db.query(Lead).filter(Lead.email == data.email).first()
+            if existing_lead:
+                raise AppException(message="Lead with email already exists", status_code=400)
+
+            if data.industry_id is not None:
+                from app.models.industry import Industry
+                industry = self.db.query(Industry).filter(Industry.id == data.industry_id).first()
+                if not industry:
+                    raise AppException(message="Industry not found", status_code=404)
+            
+            self.db.add(lead)
+            self.db.commit()
+            self.db.refresh(lead)
+            return lead
+        except Exception as e:
+            raise AppException(message=str(e), status_code=500)
 
     def UPDATE(self, lead: Lead, data: LeadUpdate):
         for field, value in data.model_dump().items():
