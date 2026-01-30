@@ -3,12 +3,15 @@ from fastapi import FastAPI
 from app.api.v1.lead_router import router as lead_router
 from app.api.v1.industry_router import router as industry_router
 from app.core.handlers import register_exception_handlers
+from app.core.logger import setup_logging
 from app.core.middleware import register_middleware
 
 load_dotenv()
 
 
 def create_app() -> FastAPI:
+    setup_logging()
+    
     app = FastAPI(title="AI Sales Doctor MVP")
 
     register_middleware(app)
