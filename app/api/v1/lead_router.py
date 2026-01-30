@@ -5,7 +5,7 @@ from app.dependencies.db import get_db
 from app.schemas.lead import LeadCreate, LeadUpdate, LeadResponse
 from app.services.lead_services import LeadService
 
-router = APIRouter(prefix="/leads", tags=["Leads"])
+router = APIRouter(prefix="/api/v1/leads", tags=["Leads"])
 
 @router.get("/", response_model=list[LeadResponse])
 def get_leads(

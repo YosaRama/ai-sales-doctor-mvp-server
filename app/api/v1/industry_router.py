@@ -5,7 +5,7 @@ from app.dependencies.db import get_db
 from app.schemas.industry import IndustryCreate, IndustryUpdate, IndustryResponse
 from app.services.industry_services import IndustryService
 
-router = APIRouter(prefix="/industries", tags=["Industries"])
+router = APIRouter(prefix="/api/v1/industries", tags=["Industries"])
 
 @router.get("/", response_model=list[IndustryResponse])
 def get_industries(
