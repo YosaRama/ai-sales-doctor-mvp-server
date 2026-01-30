@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.exception import AppException
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadUpdate
@@ -17,59 +17,74 @@ class LeadRepository:
         headcount: str | None = None,
         industry_ids: list[int] | None = None,
         logic: str = "AND",
+        order_by: str | None = "updated_at",
+        order_dir: str = "DESC",
     ):
-        offset = (page - 1) * page_size
-        query = self.db.query(Lead)
+        try:
+            offset = (page - 1) * page_size
+            query = self.db.query(Lead)
 
-        conditions = []
+            conditions = []
 
-        if name:
-            conditions.append(Lead.name.ilike(f"%{name}%"))
+            if name:
+                conditions.append(Lead.name.ilike(f"%{name}%"))
 
-        if headcount:
-            if "-" in headcount:
-                min_val, max_val = map(int, headcount.split("-"))
-                conditions.append(Lead.headcount.between(min_val, max_val))
-            else:
-                conditions.append(Lead.headcount == int(headcount))
+            if headcount:
+                if "-" in headcount:
+                    min_val, max_val = map(int, headcount.split("-"))
+                    conditions.append(Lead.headcount.between(min_val, max_val))
+                else:
+                    conditions.append(Lead.headcount == int(headcount))
 
-        if industry_ids:
-            conditions.append(Lead.industry_id.in_(industry_ids))
+            if industry_ids:
+                conditions.append(Lead.industry_id.in_(industry_ids))
 
-        if conditions:
-            query = query.filter(
-                or_(*conditions) if logic == "OR" else and_(*conditions)
+            if conditions:
+                query = query.filter(
+                    or_(*conditions) if logic == "OR" else and_(*conditions)
+                )
+
+            total = query.count()
+
+            if order_by:
+                if order_dir.upper() == "ASC":
+                    query = query.order_by(getattr(Lead, order_by).asc())
+                else:
+                    query = query.order_by(getattr(Lead, order_by).desc())
+
+            items = (
+                query.offset(offset)
+                .limit(page_size)
+                .options(
+                    joinedload(Lead.industry),
+                )
+                .all()
             )
 
-        total = query.count()
 
-        items = (
-            query.order_by(Lead.created_at.desc())
-            .offset(offset)
-            .limit(page_size)
-            .all()
-        )
-
-        return {
-            "result": items,
-            "total": total,
-        }
+            return {
+                "result": items,
+                "total": total,
+            }
+        except Exception as e:
+            print(f"Error in list_leads: {e}")
+            raise AppException(message=str(e), status_code=500)
 
 
     def GET_BY_ID(self, lead_id: int):
         return self.db.query(Lead).filter(Lead.id == lead_id).first()
 
-    def CREATE(self, data: LeadCreate):
+    def CREATE(self, data: dict):
         try:
-            lead = Lead(**data.model_dump())
+            lead = Lead(**data)
 
-            existing_lead = self.db.query(Lead).filter(Lead.email == data.email).first()
+            existing_lead = self.db.query(Lead).filter(Lead.email == lead.email).first()
             if existing_lead:
                 raise AppException(message="Lead with email already exists", status_code=400)
 
-            if data.industry_id is not None:
+            if lead.industry_id is not None:
                 from app.models.industry import Industry
-                industry = self.db.query(Industry).filter(Industry.id == data.industry_id).first()
+                industry = self.db.query(Industry).filter(Industry.id == lead.industry_id).first()
                 if not industry:
                     raise AppException(message="Industry not found", status_code=404)
             

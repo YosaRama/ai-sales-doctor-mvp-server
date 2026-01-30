@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
+from app.schemas.industry import IndustryResponse
+
 class LeadBase(BaseModel):
     name: str
     job_title: str
@@ -20,6 +22,7 @@ class LeadResponse(LeadBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    industry: IndustryResponse | None
 
     class Config:
         from_attributes = True

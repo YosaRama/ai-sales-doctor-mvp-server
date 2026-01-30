@@ -1,8 +1,10 @@
 
+from sys import stdout
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import true
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import QueryEvents, Session
 
+from app.core.exception import AppException
 from app.dependencies.db import get_db
 from app.schemas.lead import LeadCreate, LeadUpdate, LeadResponse
 from app.schemas.base import PaginatedResponse
@@ -19,7 +21,9 @@ def get_leads(
     page_size: int = 10,
     name: str | None = None,
     headcount: str | None = None,
-    industry_ids: str | None = None 
+    industry_ids: str | None = None,
+    order_by: str | None = "updated_at",
+    order_dir: str = Query("DESC", pattern="^(ASC|DESC)$")
 ):
     try:
         result = LeadService(db).list_leads(
@@ -28,7 +32,9 @@ def get_leads(
             page_size=page_size,
             name=name,
             headcount=headcount,
-            industry_ids=industry_ids
+            industry_ids=industry_ids,
+            order_by=order_by,
+            order_dir=order_dir
         )
         return ApiResponse(success=True, message="Successfully retrieved leads", data=result)
     except Exception as e:

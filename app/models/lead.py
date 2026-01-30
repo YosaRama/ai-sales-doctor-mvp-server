@@ -14,8 +14,14 @@ class Lead(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     headcount: Mapped[int] = mapped_column(Integer)
     industry_id: Mapped[int] = mapped_column(Integer, ForeignKey("industries.id"))
-    created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=text("NOW()"))
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=text("NOW()"), onupdate=text("NOW()"))
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
 
     industry = relationship("Industry", back_populates="leads")
     

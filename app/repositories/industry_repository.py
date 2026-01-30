@@ -6,7 +6,7 @@ class IndustryRepository:
         self.db = db
 
     def GET_ALL(self):
-        return self.db.query(Industry).all()
+        return self.db.query(Industry).order_by(Industry.created_at.desc()).all()
 
     def GET_BY_ID(self, industry_id: int):
         return self.db.query(Industry).filter(Industry.id == industry_id).first()
