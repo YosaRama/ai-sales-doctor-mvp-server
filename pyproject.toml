@@ -1,16 +1,17 @@
 [project]
 name = "ai-sales-doctor-mvp-server"
 version = "1.0.0"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
   "fastapi",
   "uvicorn",
   "sqlalchemy",
-  "psycopg2",
+  "psycopg2-binary",
   "alembic",
   "pydantic",
   "pydantic-settings",
   "python-dotenv",
+  "pydantic[email]"
 ]
 
 [project.scripts]
