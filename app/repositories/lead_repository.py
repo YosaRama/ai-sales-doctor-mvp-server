@@ -95,8 +95,8 @@ class LeadRepository:
         except Exception as e:
             raise AppException(message=str(e), status_code=500)
 
-    def UPDATE(self, lead: Lead, data: LeadUpdate):
-        for field, value in data.model_dump().items():
+    def UPDATE(self, lead: Lead, data: dict):
+        for field, value in data.items():
             setattr(lead, field, value)
         self.db.commit()
         self.db.refresh(lead)
